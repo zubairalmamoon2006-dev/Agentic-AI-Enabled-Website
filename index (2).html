@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="task-manager">
+        <h2>Task Manager</h2>
+
+        <form class="task-form" id="taskForm" novalidate>
+          <div class="input-group">
+            <input
+              type="text"
+              id="taskInput"
+              placeholder="What do you need to do?"
+              autocomplete="off"
+              maxlength="100"
+            />
+          </div>
+          <button type="submit" class="login-btn">Add Task</button>
+        </form>
+
+        <ul class="task-list" id="taskList"></ul>
+
+        <p class="empty-state" id="emptyState">No tasks yet. Add one above!</p>
+      </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

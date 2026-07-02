@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Task Planner</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <div class="container">
+        <!-- ===== Smart Planner ===== -->
+        <div class="card planner-card">
+          <h2>Smart Task Planner</h2>
+          <p class="subtitle">
+            Describe a goal and let AI break it down into an actionable, step-by-step plan.
+          </p>
+
+          <form class="goal-form" id="goalForm" novalidate>
+            <div class="input-group">
+              <textarea
+                id="goalInput"
+                class="goal-input"
+                placeholder="e.g. Plan a weekend trip to Goa"
+                maxlength="300"
+                rows="2"
+              ></textarea>
+            </div>
+            <button type="submit" class="login-btn" id="generateBtn">
+              Generate Plan
+            </button>
+          </form>
+
+          <!-- Loading state -->
+          <div class="loading-state" id="plannerLoading" hidden>
+            <span class="spinner"></span>
+            <span>Talking to Gemini and building your plan&hellip;</span>
+          </div>
+
+          <!-- Error state -->
+          <div class="error-banner" id="plannerError" hidden></div>
+
+          <!-- Results -->
+          <div class="plan-results" id="planResults" hidden>
+            <div class="plan-results-header">
+              <h3>Steps to achieve your goal</h3>
+              <button type="button" class="link-btn" id="addAllBtn">
+                Add all to my tasks
+              </button>
+            </div>
+            <ol class="step-list" id="stepList"></ol>
+          </div>
+        </div>
+
+        <!-- ===== Task Manager (from Week 2) ===== -->
+        <div class="card task-manager">
+          <h2>My Tasks</h2>
+
+          <form class="task-form" id="taskForm" novalidate>
+            <div class="input-group">
+              <input
+                type="text"
+                id="taskInput"
+                placeholder="What do you need to do?"
+                autocomplete="off"
+                maxlength="100"
+              />
+            </div>
+            <button type="submit" class="login-btn">Add Task</button>
+          </form>
+
+          <ul class="task-list" id="taskList"></ul>
+
+          <p class="empty-state" id="emptyState">No tasks yet. Add one above, or generate a plan!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

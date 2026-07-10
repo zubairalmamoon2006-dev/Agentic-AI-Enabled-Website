@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports - Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Finance Tracker</a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="add-transaction.html">Add</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="reports.html" class="active">Reports</a></li>
+      <li><a href="assistant.html">AI Assistant</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="section-header">
+      <h2>Reports</h2>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h3 style="margin-bottom:1rem;">Spending by Category</h3>
+      <div id="chart-empty" class="empty-state">
+        <p>Add some expenses to see your spending chart.</p>
+        <a href="add-transaction.html" class="btn btn-outline">Add Transaction</a>
+      </div>
+      <div style="max-width:400px;margin:0 auto;">
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:1rem;">AI Spending Insights</h3>
+      <p style="color:var(--text-muted);margin-bottom:1rem;font-size:0.9rem;">
+        Get personalised advice based on your actual spending data.
+      </p>
+      <button class="btn btn-primary" id="insights-btn" onclick="getInsights()">
+        Get AI Insights
+      </button>
+      <div id="insights-result" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/ai.js"></script>
+  <script>
+    const settings = getSettings();
+    if (settings.darkMode) document.documentElement.setAttribute("data-theme", "dark");
+    const currency = settings.currency || "₹";
+
+    const totals = getCategoryTotals();
+    const labels = Object.keys(totals);
+    const values = Object.values(totals);
+
+    if (labels.length > 0) {
+      document.getElementById("chart-empty").style.display = "none";
+      const colors = ["#2a6e48", "#e06060", "#f0a500", "#4c9af0", "#a040b8", "#00b4d8", "#ff6b6b", "#ffd93d", "#6bcb77"];
+      new Chart(document.getElementById("myChart"), {
+        type: "doughnut",
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 2,
+            borderColor: "var(--card-bg)"
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom", labels: { padding: 16 } },
+            tooltip: {
+              callbacks: {
+                label: function (ctx) {
+                  return ctx.label + ": " + currency + ctx.raw.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    async function getInsights() {
+      const btn = document.getElementById("insights-btn");
+      const result = document.getElementById("insights-result");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+
+      const balance = getBalance();
+      const income = getTotalIncome();
+      const expenses = getTotalExpenses();
+
+      let prompt;
+      if (labels.length === 0) {
+        prompt = "I have no transaction data yet. Give me 3 general tips for managing personal finances better.";
+      } else {
+        prompt = `Here is my financial summary:
+Balance: ${currency}${balance.toLocaleString()}
+Total Income: ${currency}${income.toLocaleString()}
+Total Expenses: ${currency}${expenses.toLocaleString()}
+Spending by category: ${JSON.stringify(totals)}
+
+Based on this data, give me:
+1. My top 2 spending categories and why they might be high.
+2. 3 specific actionable tips to save more money.
+3. Any red flags or concerns about my spending habits.
+Keep it concise and practical.`;
+      }
+
+      const reply = await askAI(prompt);
+      result.innerHTML = `<div class="card" style="background:var(--bg);white-space:pre-wrap;">${reply}</div>`;
+      btn.disabled = false;
+      btn.innerHTML = "Get AI Insights";
+    }
+  </script>
+</body>
+</html>

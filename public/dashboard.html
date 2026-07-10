@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Finance Tracker</a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="add-transaction.html">Add</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="assistant.html">AI Assistant</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="section-header">
+      <h2>Dashboard</h2>
+      <a href="add-transaction.html" class="btn btn-primary btn-sm">+ New Transaction</a>
+    </div>
+
+    <div class="card-grid">
+      <div class="card stat-card">
+        <div class="label">Balance</div>
+        <div class="value" id="balance">₹0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Total Income</div>
+        <div class="value green" id="income">₹0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Total Expenses</div>
+        <div class="value red" id="expenses">₹0</div>
+      </div>
+    </div>
+
+    <div id="budget-section" style="display:none" class="card" style="margin-bottom:1.5rem;">
+      <div class="setting-info">
+        <h3>Monthly Budget</h3>
+        <p id="budget-text"></p>
+      </div>
+      <div class="budget-bar">
+        <div class="budget-bar-fill" id="budget-fill"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:1rem;">Recent Transactions</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="recent-list"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-msg">
+        <p>No transactions yet.</p>
+        <a href="add-transaction.html" class="btn btn-outline">Add One Now</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const settings = getSettings();
+    if (settings.darkMode) document.documentElement.setAttribute("data-theme", "dark");
+
+    const currency = settings.currency || "₹";
+    const balance = getBalance();
+    const income = getTotalIncome();
+    const expenses = getTotalExpenses();
+
+    document.getElementById("balance").textContent = currency + balance.toLocaleString();
+    document.getElementById("income").textContent = currency + income.toLocaleString();
+    document.getElementById("expenses").textContent = currency + expenses.toLocaleString();
+
+    const budget = settings.budget || 0;
+    if (budget > 0) {
+      document.getElementById("budget-section").style.display = "block";
+      const pct = Math.min((expenses / budget) * 100, 100);
+      const fill = document.getElementById("budget-fill");
+      fill.style.width = pct + "%";
+      fill.style.background = pct > 90 ? "#e06060" : pct > 70 ? "#f0a500" : "#2a6e48";
+      document.getElementById("budget-text").textContent =
+        `Spent ${currency}${expenses.toLocaleString()} of ${currency}${budget.toLocaleString()} (${Math.round(pct)}%)`;
+    }
+
+    const transactions = getTransactions().sort((a, b) => new Date(b.date) - new Date(a.date));
+    const tbody = document.getElementById("recent-list");
+    if (transactions.length === 0) {
+      document.getElementById("empty-msg").style.display = "block";
+      tbody.parentElement.parentElement.querySelector(".table-wrapper").style.display = "none";
+    } else {
+      document.getElementById("empty-msg").style.display = "none";
+      transactions.slice(0, 5).forEach(t => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${t.date}</td>
+          <td>${t.description}</td>
+          <td>${t.category}</td>
+          <td><span class="tag tag-${t.type}">${t.type}</span></td>
+          <td style="font-weight:600;color:${t.type === "income" ? "var(--primary)" : "var(--danger)"}">
+            ${t.type === "income" ? "+" : "-"}${currency}${t.amount.toLocaleString()}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>

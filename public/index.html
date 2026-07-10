@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Finance Tracker</a>
+    <ul class="navbar-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="add-transaction.html">Add</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="assistant.html">AI Assistant</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="hero">
+      <h1>Track Your Money Smarter</h1>
+      <p>
+        Take control of your finances. Log income and expenses, visualise
+        your spending, and get AI-powered insights to save more.
+      </p>
+      <a href="add-transaction.html" class="btn btn-primary">Add Your First Transaction</a>
+
+      <div class="hero-features">
+        <div class="feature">
+          <div class="feature-icon">&#128202;</div>
+          <h3>Dashboard</h3>
+          <p>See balance, income, and expenses at a glance.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">&#128200;</div>
+          <h3>Reports</h3>
+          <p>Visualise spending by category with charts.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">&#129302;</div>
+          <h3>AI Assistant</h3>
+          <p>Get personalised financial advice instantly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const settings = getSettings();
+    if (settings.darkMode) document.documentElement.setAttribute("data-theme", "dark");
+  </script>
+</body>
+</html>

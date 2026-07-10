@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings - Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Finance Tracker</a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="add-transaction.html">Add</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="assistant.html">AI Assistant</a></li>
+      <li><a href="settings.html" class="active">Settings</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="section-header">
+      <h2>Settings</h2>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h3 style="margin-bottom:1rem;">Budget Goal</h3>
+      <div class="form-group">
+        <label for="budget">Monthly Budget</label>
+        <input type="number" id="budget" min="0" step="100" placeholder="e.g. 20000" />
+      </div>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">
+        Set a monthly spending limit. You'll see a progress bar on the dashboard.
+      </p>
+      <button class="btn btn-primary btn-sm" onclick="saveBudget()">Save Budget</button>
+      <div id="budget-msg"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h3 style="margin-bottom:1rem;">Currency</h3>
+      <div class="form-group">
+        <label for="currency">Currency Symbol</label>
+        <select id="currency">
+          <option value="₹">₹ Rupee</option>
+          <option value="$">$ Dollar</option>
+          <option value="€">€ Euro</option>
+          <option value="£">£ Pound</option>
+          <option value="¥">¥ Yen</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="saveCurrency()">Save Currency</button>
+      <div id="currency-msg"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Dark Mode</h3>
+          <p>Switch between light and dark themes.</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="dark-toggle" onchange="toggleDark()" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Reset All Data</h3>
+          <p>Permanently delete all transactions and settings.</p>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="resetAll()">Reset Everything</button>
+      </div>
+      <div id="reset-msg"></div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const settings = getSettings();
+    if (settings.darkMode) document.documentElement.setAttribute("data-theme", "dark");
+
+    document.getElementById("budget").value = settings.budget || "";
+    document.getElementById("currency").value = settings.currency || "₹";
+    document.getElementById("dark-toggle").checked = !!settings.darkMode;
+
+    function saveBudget() {
+      const val = parseFloat(document.getElementById("budget").value) || 0;
+      const s = getSettings();
+      s.budget = val;
+      saveSettings(s);
+      document.getElementById("budget-msg").innerHTML =
+        '<div class="alert alert-success" style="margin-top:0.75rem;">Budget saved!</div>';
+      setTimeout(() => { document.getElementById("budget-msg").innerHTML = ""; }, 2500);
+    }
+
+    function saveCurrency() {
+      const val = document.getElementById("currency").value;
+      const s = getSettings();
+      s.currency = val;
+      saveSettings(s);
+      document.getElementById("currency-msg").innerHTML =
+        '<div class="alert alert-success" style="margin-top:0.75rem;">Currency saved!</div>';
+      setTimeout(() => { document.getElementById("currency-msg").innerHTML = ""; }, 2500);
+    }
+
+    function toggleDark() {
+      const checked = document.getElementById("dark-toggle").checked;
+      const s = getSettings();
+      s.darkMode = checked;
+      saveSettings(s);
+      if (checked) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+    }
+
+    function resetAll() {
+      if (confirm("Are you sure you want to delete ALL your transactions and settings? This cannot be undone.")) {
+        clearTransactions();
+        saveSettings({ budget: 0, currency: "₹", darkMode: false });
+        document.getElementById("budget").value = "";
+        document.getElementById("currency").value = "₹";
+        document.getElementById("dark-toggle").checked = false;
+        document.documentElement.removeAttribute("data-theme");
+        document.getElementById("reset-msg").innerHTML =
+          '<div class="alert alert-danger" style="margin-top:0.75rem;">All data has been reset.</div>';
+        setTimeout(() => { document.getElementById("reset-msg").innerHTML = ""; }, 3000);
+      }
+    }
+  </script>
+</body>
+</html>

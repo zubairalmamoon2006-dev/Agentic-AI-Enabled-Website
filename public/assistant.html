@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Assistant - Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Finance Tracker</a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="add-transaction.html">Add</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="assistant.html" class="active">AI Assistant</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="section-header">
+      <h2>AI Finance Assistant</h2>
+    </div>
+
+    <div class="card">
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-box">
+          <div class="message ai">
+            Hi! I'm your AI finance assistant. Ask me anything about budgeting, saving, investing, or your spending habits.
+          </div>
+        </div>
+        <div class="chat-input">
+          <input type="text" id="user-input" placeholder="Ask a finance question..." />
+          <button class="btn btn-primary" id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/ai.js"></script>
+  <script>
+    const settings = getSettings();
+    if (settings.darkMode) document.documentElement.setAttribute("data-theme", "dark");
+
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    userInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    function addMessage(text, sender) {
+      const div = document.createElement("div");
+      div.className = `message ${sender}`;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return div;
+    }
+
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      addMessage(text, "user");
+      userInput.value = "";
+      sendBtn.disabled = true;
+
+      const loading = document.createElement("div");
+      loading.className = "message ai";
+      loading.innerHTML = '<span class="spinner"></span> Thinking...';
+      chatBox.appendChild(loading);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const balance = getBalance();
+      const income = getTotalIncome();
+      const expenses = getTotalExpenses();
+      const totals = getCategoryTotals();
+
+      let context = `The user has a current balance of ₹${balance}, total income of ₹${income}, and total expenses of ₹${expenses}.`;
+      if (Object.keys(totals).length > 0) {
+        context += ` Their spending by category: ${JSON.stringify(totals)}.`;
+      }
+      context += `\n\nUser question: ${text}`;
+
+      const reply = await askAI(context);
+
+      chatBox.removeChild(loading);
+      addMessage(reply, "ai");
+      sendBtn.disabled = false;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History - Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Finance Tracker</a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="add-transaction.html">Add</a></li>
+      <li><a href="history.html" class="active">History</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="assistant.html">AI Assistant</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="section-header">
+      <h2>Transaction History</h2>
+      <a href="add-transaction.html" class="btn btn-primary btn-sm">+ New</a>
+    </div>
+
+    <div class="card">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <input type="text" id="search" placeholder="Search transactions..." />
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tx-list"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="empty-msg" style="display:none;">
+        <p>No transactions yet.</p>
+        <a href="add-transaction.html" class="btn btn-outline">Add Your First Transaction</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const settings = getSettings();
+    if (settings.darkMode) document.documentElement.setAttribute("data-theme", "dark");
+    const currency = settings.currency || "₹";
+
+    function render(filter = "") {
+      const transactions = getTransactions().sort((a, b) => new Date(b.date) - new Date(a.date));
+      const tbody = document.getElementById("tx-list");
+      const emptyMsg = document.getElementById("empty-msg");
+      tbody.innerHTML = "";
+
+      const filtered = filter
+        ? transactions.filter(t =>
+            t.description.toLowerCase().includes(filter) ||
+            t.category.toLowerCase().includes(filter) ||
+            t.type.toLowerCase().includes(filter))
+        : transactions;
+
+      if (filtered.length === 0) {
+        emptyMsg.style.display = "block";
+        tbody.parentElement.parentElement.querySelector(".table-wrapper").style.display = "none";
+      } else {
+        emptyMsg.style.display = "none";
+        tbody.parentElement.parentElement.querySelector(".table-wrapper").style.display = "";
+        filtered.forEach(t => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${t.date}</td>
+            <td>${t.description}</td>
+            <td>${t.category}</td>
+            <td><span class="tag tag-${t.type}">${t.type}</span></td>
+            <td style="font-weight:600;color:${t.type === "income" ? "var(--primary)" : "var(--danger)"}">
+              ${t.type === "income" ? "+" : "-"}${currency}${t.amount.toLocaleString()}
+            </td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="remove(${t.id})">Delete</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    function remove(id) {
+      if (confirm("Delete this transaction?")) {
+        deleteTransaction(id);
+        render(document.getElementById("search").value.toLowerCase().trim());
+      }
+    }
+
+    document.getElementById("search").addEventListener("input", function () {
+      render(this.value.toLowerCase().trim());
+    });
+
+    render();
+  </script>
+</body>
+</html>
